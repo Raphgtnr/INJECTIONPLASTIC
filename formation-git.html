@@ -1,0 +1,674 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Formation Git, GitHub & Jules</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout : cahier quadrillé d'ingénieur — sommaire collant à gauche, modules numérotés (vraie progression), callouts codés couleur */
+:root{
+  --paper:#f7f8f6; --grid:#e3e8e4; --grid2:#d3dbd5;
+  --ink:#1c2420; --muted:#5b6862; --line:#cfd8d2;
+  --card:#ffffff; --code-bg:#1f2623; --code-fg:#e6ece8; --code-dim:#8fa199;
+  --accent:#1f6f5c; --accent-soft:#e1efe9;
+  --info:#2d5fa8; --info-bg:#e8eff9;
+  --ok:#2f7d3a; --ok-bg:#e7f3e8;
+  --warn:#a86a12; --warn-bg:#fbf1df;
+  --danger:#b3362f; --danger-bg:#f9e6e4;
+  --f-display:"Spectral", Georgia, "Times New Roman", serif;
+  --f-body:"Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#141917; --grid:#1d2421; --grid2:#252e2a;
+  --ink:#e4ebe7; --muted:#9aa9a2; --line:#2e3833;
+  --card:#1a201d; --code-bg:#0e1211; --code-fg:#dfe7e2; --code-dim:#7d8e86;
+  --accent:#5cc2a3; --accent-soft:#183129;
+  --info:#7fa9e8; --info-bg:#172334;
+  --ok:#7cc786; --ok-bg:#16281a;
+  --warn:#e3a94d; --warn-bg:#2d2312;
+  --danger:#ef8278; --danger-bg:#311a18;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#141917; --grid:#1d2421; --grid2:#252e2a;
+  --ink:#e4ebe7; --muted:#9aa9a2; --line:#2e3833;
+  --card:#1a201d; --code-bg:#0e1211; --code-fg:#dfe7e2; --code-dim:#7d8e86;
+  --accent:#5cc2a3; --accent-soft:#183129;
+  --info:#7fa9e8; --info-bg:#172334;
+  --ok:#7cc786; --ok-bg:#16281a;
+  --warn:#e3a94d; --warn-bg:#2d2312;
+  --danger:#ef8278; --danger-bg:#311a18;
+  color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.6;
+  background-image:
+    linear-gradient(var(--grid2) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid2) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:100px 100px,100px 100px,20px 20px,20px 20px;
+}
+.wrap{max-width:1180px; margin:0 auto; padding-inline:20px; padding-block:28px 80px; display:grid; grid-template-columns:240px minmax(0,1fr); gap:40px}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr); gap:20px}}
+
+/* Sommaire */
+nav.toc{position:sticky; top:calc(env(safe-area-inset-top,0px) + 20px); align-self:start; font-size:14px}
+@media (max-width:860px){nav.toc{position:static}}
+.toc h2{font-family:var(--f-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:0 0 10px}
+.toc ol{list-style:none; margin:0; padding:0; display:grid; gap:2px}
+.toc a{display:flex; gap:10px; align-items:baseline; padding:6px 8px; border-radius:6px; color:var(--ink); text-decoration:none}
+.toc a:hover,.toc a:focus-visible{background:var(--accent-soft); outline:none}
+.toc .n{font-family:var(--f-mono); font-size:12px; color:var(--accent); min-width:22px}
+.toc a.done .n::after{content:" ✓"}
+.toc a.done{color:var(--muted)}
+.progress{margin-top:14px; font-family:var(--f-mono); font-size:12px; color:var(--muted)}
+.bar{height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin-top:6px}
+.bar span{display:block; height:100%; width:0; background:var(--accent); transition:width .3s}
+@media (max-width:860px){.toc ol{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
+
+/* Texte */
+main{min-width:0}
+header.hero{padding-block:10px 26px; border-bottom:2px solid var(--ink); margin-bottom:34px}
+.eyebrow{font-family:var(--f-mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
+h1{font-family:var(--f-display); font-size:clamp(34px,5vw,52px); line-height:1.05; margin:8px 0 14px; text-wrap:balance; font-weight:700}
+.lede{font-size:18px; color:var(--muted); max-width:62ch; margin:0}
+.meta{display:flex; flex-wrap:wrap; gap:8px; margin-top:18px}
+.chip{font-family:var(--f-mono); font-size:12px; padding:3px 10px; border:1px solid var(--line); border-radius:99px; background:var(--card); color:var(--muted)}
+
+section.mod{margin-bottom:64px; scroll-margin-top:20px}
+.mod-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:18px}
+.mod-num{font-family:var(--f-mono); font-size:13px; color:var(--paper); background:var(--accent); padding:2px 8px; border-radius:4px}
+h2{font-family:var(--f-display); font-size:30px; line-height:1.15; margin:0; text-wrap:balance; flex:1; min-width:0}
+h3{font-family:var(--f-body); font-size:17px; font-weight:700; margin:28px 0 8px}
+p,li{max-width:70ch}
+p{margin:0 0 12px}
+ul,ol{padding-left:22px; margin:0 0 12px}
+li{margin-bottom:4px}
+code{font-family:var(--f-mono); font-size:.88em; background:var(--accent-soft); padding:1px 5px; border-radius:4px}
+a{color:var(--accent)}
+.done-btn{font-family:var(--f-mono); font-size:12px; border:1px solid var(--line); background:var(--card); color:var(--muted); border-radius:6px; padding:5px 10px; cursor:pointer}
+.done-btn[aria-pressed="true"]{background:var(--accent); color:var(--paper); border-color:var(--accent)}
+.done-btn:focus-visible,.copy:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* Code */
+.code{position:relative; background:var(--code-bg); color:var(--code-fg); border-radius:8px; margin:10px 0 16px; overflow:hidden}
+.code .lbl{font-family:var(--f-mono); font-size:11px; color:var(--code-dim); padding:8px 14px 0; letter-spacing:.06em; text-transform:uppercase}
+.code pre{margin:0; padding:10px 14px 14px; overflow-x:auto; font-family:var(--f-mono); font-size:13.5px; line-height:1.65}
+.code .c{color:var(--code-dim)}
+.code .p{color:#7fd1b5; user-select:none}
+.code .o{color:#c6d0cb; opacity:.75}
+.copy{position:absolute; top:8px; right:8px; font-family:var(--f-mono); font-size:11px; background:transparent; border:1px solid #3d4a44; color:var(--code-dim); border-radius:5px; padding:3px 8px; cursor:pointer}
+.copy:hover{color:var(--code-fg); border-color:var(--code-dim)}
+
+/* Callouts */
+.call{border-left:4px solid; border-radius:0 8px 8px 0; padding:12px 16px; margin:14px 0 18px; font-size:15px}
+.call b.t{display:block; font-family:var(--f-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px}
+.call p:last-child,.call ul:last-child{margin-bottom:0}
+.info{background:var(--info-bg); border-color:var(--info)} .info b.t{color:var(--info)}
+.ok{background:var(--ok-bg); border-color:var(--ok)} .ok b.t{color:var(--ok)}
+.warn{background:var(--warn-bg); border-color:var(--warn)} .warn b.t{color:var(--warn)}
+.danger{background:var(--danger-bg); border-color:var(--danger)} .danger b.t{color:var(--danger)}
+
+/* Tableaux */
+.tbl{overflow-x:auto; margin:10px 0 18px; border:1px solid var(--line); border-radius:8px; background:var(--card)}
+table{border-collapse:collapse; width:100%; font-size:14.5px}
+th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--f-mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:var(--paper)}
+tr:last-child td{border-bottom:0}
+td code{white-space:nowrap}
+
+/* Schémas */
+figure{margin:14px 0 20px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; overflow-x:auto}
+figcaption{font-size:13px; color:var(--muted); margin-top:8px}
+svg text{font-family:var(--f-mono)}
+
+/* Glossaire */
+.gloss{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; margin:12px 0 18px}
+.term{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px}
+.term dt{font-family:var(--f-mono); font-weight:700; color:var(--accent); font-size:14px}
+.term dd{margin:4px 0 0; font-size:14.5px; color:var(--ink)}
+
+/* Étapes */
+.steps{counter-reset:s; list-style:none; padding:0}
+.steps>li{counter-increment:s; position:relative; padding-left:40px; margin-bottom:14px}
+.steps>li::before{content:counter(s); position:absolute; left:0; top:0; width:26px; height:26px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-family:var(--f-mono); font-size:13px; font-weight:700; display:grid; place-items:center}
+
+/* Quiz */
+.quiz{display:grid; gap:14px}
+.q{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px}
+.q p{font-weight:600; margin-bottom:10px}
+.opts{display:grid; gap:6px}
+.opts button{text-align:left; font:inherit; font-size:14.5px; background:var(--paper); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:8px 12px; cursor:pointer}
+.opts button:hover{border-color:var(--accent)}
+.opts button.right{background:var(--ok-bg); border-color:var(--ok)}
+.opts button.wrong{background:var(--danger-bg); border-color:var(--danger)}
+.expl{font-size:14px; color:var(--muted); margin-top:8px}
+.score{font-family:var(--f-mono); font-size:14px; color:var(--accent)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important; scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Sommaire">
+  <h2>Sommaire</h2>
+  <ol id="toc">
+    <li><a href="#m1"><span class="n">01</span>Les concepts</a></li>
+    <li><a href="#m2"><span class="n">02</span>Installer et configurer</a></li>
+    <li><a href="#m3"><span class="n">03</span>Créer un repo</a></li>
+    <li><a href="#m4"><span class="n">04</span>Le cycle quotidien</a></li>
+    <li><a href="#m5"><span class="n">05</span>Branches et pull requests</a></li>
+    <li><a href="#m6"><span class="n">06</span>.gitignore et secrets</a></li>
+    <li><a href="#m7"><span class="n">07</span>Annuler et réparer</a></li>
+    <li><a href="#m8"><span class="n">08</span>Les conflits</a></li>
+    <li><a href="#m9"><span class="n">09</span>GitHub au sens large</a></li>
+    <li><a href="#m10"><span class="n">10</span>Jules depuis le terminal</a></li>
+    <li><a href="#m11"><span class="n">11</span>Les erreurs de ce soir</a></li>
+    <li><a href="#m12"><span class="n">12</span>Antisèche</a></li>
+    <li><a href="#m13"><span class="n">13</span>Quiz</a></li>
+  </ol>
+  <div class="progress"><span id="pg">0 / 13 modules</span><div class="bar"><span id="pgbar"></span></div></div>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">Formation · macOS · zsh</div>
+  <h1>Git, GitHub et Jules, du premier commit à l'agent IA</h1>
+  <p class="lede">Ce que sont un repo, un commit, une branche et une pull request, les commandes à connaître par cœur, et comment piloter Jules depuis ton terminal. Chaque bloc de code se copie en un clic.</p>
+  <div class="meta"><span class="chip">13 modules</span><span class="chip">~1 h 30</span><span class="chip">Compte GitHub : Raphgtnr</span></div>
+</header>
+
+<!-- 01 -->
+<section class="mod" id="m1">
+  <div class="mod-head"><span class="mod-num">01</span><h2>Les concepts</h2><button class="done-btn" data-m="m1" aria-pressed="false">Marquer comme lu</button></div>
+  <p><b>Git</b> est un logiciel installé sur ton Mac qui enregistre l'historique de tes fichiers. <b>GitHub</b> est un site web qui héberge des copies de ces historiques en ligne, pour les sauvegarder, les partager et collaborer. Git fonctionne sans GitHub ; GitHub ne sert à rien sans Git.</p>
+  <div class="call info"><b class="t">Analogie qualité</b><p>Un commit, c'est une révision indicée d'un plan : on sait qui a modifié quoi, quand et pourquoi, et on peut revenir à l'indice B à tout moment. Git fait ça pour un dossier entier, automatiquement.</p></div>
+
+  <h3>Les 4 zones où vivent tes fichiers</h3>
+  <figure>
+    <svg viewBox="0 0 760 210" width="100%" style="min-width:600px" role="img" aria-label="Schéma des quatre zones Git">
+      <g font-size="13">
+        <rect x="10" y="40" width="160" height="80" rx="8" fill="var(--warn-bg)" stroke="var(--warn)"/>
+        <text x="90" y="72" text-anchor="middle" fill="var(--ink)" font-weight="700">Working dir</text>
+        <text x="90" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">tes fichiers modifiés</text>
+        <rect x="205" y="40" width="160" height="80" rx="8" fill="var(--info-bg)" stroke="var(--info)"/>
+        <text x="285" y="72" text-anchor="middle" fill="var(--ink)" font-weight="700">Staging</text>
+        <text x="285" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">prêts à être commités</text>
+        <rect x="400" y="40" width="160" height="80" rx="8" fill="var(--ok-bg)" stroke="var(--ok)"/>
+        <text x="480" y="72" text-anchor="middle" fill="var(--ink)" font-weight="700">Repo local</text>
+        <text x="480" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">historique (.git)</text>
+        <rect x="595" y="40" width="155" height="80" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="672" y="72" text-anchor="middle" fill="var(--ink)" font-weight="700">GitHub</text>
+        <text x="672" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">remote « origin »</text>
+      </g>
+      <g stroke="var(--ink)" stroke-width="1.5" fill="none">
+        <path d="M170 64 H200" marker-end="url(#ar)"/>
+        <path d="M365 64 H395" marker-end="url(#ar)"/>
+        <path d="M560 64 H590" marker-end="url(#ar)"/>
+        <path d="M672 120 V170 H90 V125" marker-end="url(#ar)"/>
+      </g>
+      <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--ink)"/></marker></defs>
+      <g font-size="12" font-weight="700" fill="var(--accent)">
+        <text x="185" y="30" text-anchor="middle">git add</text>
+        <text x="380" y="30" text-anchor="middle">git commit</text>
+        <text x="577" y="30" text-anchor="middle">git push</text>
+        <text x="380" y="190" text-anchor="middle">git pull (ou git clone la 1re fois)</text>
+      </g>
+    </svg>
+    <figcaption>Un fichier modifié ne part sur GitHub qu'après trois gestes : add → commit → push.</figcaption>
+  </figure>
+
+  <h3>Vocabulaire</h3>
+  <dl class="gloss">
+    <div class="term"><dt>Repository (repo)</dt><dd>Un dossier de projet suivi par Git, avec tout son historique. Ex. : <code>Raphgtnr/INJECTIONPLASTIC</code>.</dd></div>
+    <div class="term"><dt>Commit</dt><dd>Une photo de l'état du projet, avec un message. Identifié par un hash (<code>a3f9c21</code>).</dd></div>
+    <div class="term"><dt>Branch</dt><dd>Une ligne de travail parallèle. <code>main</code> est la branche principale.</dd></div>
+    <div class="term"><dt>Remote / origin</dt><dd>La copie distante du repo (sur GitHub). <code>origin</code> est son surnom par défaut.</dd></div>
+    <div class="term"><dt>Clone</dt><dd>Télécharger un repo GitHub sur ton Mac, historique compris.</dd></div>
+    <div class="term"><dt>Push / Pull</dt><dd>Envoyer tes commits vers GitHub / récupérer ceux de GitHub.</dd></div>
+    <div class="term"><dt>Pull request (PR)</dt><dd>Une demande de fusion d'une branche dans <code>main</code>, avec relecture. C'est ce que Jules t'a proposé ce soir.</dd></div>
+    <div class="term"><dt>Merge</dt><dd>Fusionner une branche dans une autre.</dd></div>
+    <div class="term"><dt>Fork</dt><dd>Ta propre copie, sur GitHub, du repo de quelqu'un d'autre.</dd></div>
+    <div class="term"><dt>Diff</dt><dd>Les lignes ajoutées (+) et supprimées (−) entre deux versions.</dd></div>
+  </dl>
+</section>
+
+<!-- 02 -->
+<section class="mod" id="m2">
+  <div class="mod-head"><span class="mod-num">02</span><h2>Installer et configurer</h2><button class="done-btn" data-m="m2" aria-pressed="false">Marquer comme lu</button></div>
+  <p>À faire une seule fois sur ton Mac.</p>
+  <ol class="steps">
+    <li><b>Vérifier Git</b> (macOS propose d'installer les outils développeur s'il manque).
+      <div class="code"><div class="lbl">Terminal</div><pre>git --version</pre></div></li>
+    <li><b>Te présenter à Git</b> : ce nom et cet e-mail signent chaque commit.
+      <div class="code"><div class="lbl">Terminal</div><pre>git config --global user.name "Raphaël Gouttenoire"
+git config --global user.email "raphgouttenoire01@gmail.com"
+git config --global init.defaultBranch main</pre></div></li>
+    <li><b>Installer le CLI GitHub</b> (<code>gh</code>) : il gère la connexion et crée des repos sans passer par le site.
+      <div class="code"><div class="lbl">Terminal</div><pre>brew install gh
+gh auth login</pre></div>
+      Réponds : <code>GitHub.com</code> → <code>HTTPS</code> → <code>Yes</code> (authentifier Git) → <code>Login with a web browser</code>, puis colle le code affiché.</li>
+    <li><b>Activer les commentaires dans zsh</b> (évite l'erreur de ce soir avec les <code>#</code>).
+      <div class="code"><div class="lbl">Terminal</div><pre>echo 'setopt interactivecomments' >> ~/.zshrc
+source ~/.zshrc</pre></div></li>
+  </ol>
+  <div class="call ok"><b class="t">Vérification</b><p><code>gh auth status</code> doit afficher <code>Logged in to github.com account Raphgtnr</code>.</p></div>
+</section>
+
+<!-- 03 -->
+<section class="mod" id="m3">
+  <div class="mod-head"><span class="mod-num">03</span><h2>Créer un repo</h2><button class="done-btn" data-m="m3" aria-pressed="false">Marquer comme lu</button></div>
+  <p>Deux cas de figure selon où se trouve ton projet au départ.</p>
+
+  <h3>Cas A : le projet existe déjà sur ton Mac</h3>
+  <div class="code"><div class="lbl">Terminal</div><pre><span class="c"># 1. Aller dans le dossier du projet</span>
+cd ~/Documents/mon-projet
+
+<span class="c"># 2. Transformer le dossier en repo Git</span>
+git init
+
+<span class="c"># 3. Premier commit</span>
+git add .
+git commit -m "Premier commit"
+
+<span class="c"># 4. Créer le repo sur GitHub et tout envoyer en une commande</span>
+gh repo create mon-projet --private --source=. --remote=origin --push</pre></div>
+
+  <h3>Cas B : le repo existe sur GitHub, tu veux le récupérer</h3>
+  <div class="code"><div class="lbl">Terminal</div><pre>cd ~/Documents
+gh repo clone Raphgtnr/INJECTIONPLASTIC
+cd INJECTIONPLASTIC</pre></div>
+  <p>Équivalent sans <code>gh</code> : <code>git clone https://github.com/Raphgtnr/INJECTIONPLASTIC.git</code>.</p>
+
+  <h3>Cas C : partir de zéro sur GitHub</h3>
+  <div class="code"><div class="lbl">Terminal</div><pre>gh repo create nouveau-projet --private --add-readme --clone
+cd nouveau-projet</pre></div>
+
+  <div class="call warn"><b class="t">Privé par défaut</b><p>Tout repo qui touche à SFCME, Schneider ou à des données personnelles reste en <code>--private</code>. Un repo public est visible par tout Internet et indexé par les moteurs de recherche.</p></div>
+</section>
+
+<!-- 04 -->
+<section class="mod" id="m4">
+  <div class="mod-head"><span class="mod-num">04</span><h2>Le cycle quotidien</h2><button class="done-btn" data-m="m4" aria-pressed="false">Marquer comme lu</button></div>
+  <p>90 % de ton usage de Git tient dans ces six commandes, toujours dans cet ordre.</p>
+  <div class="code"><div class="lbl">La boucle</div><pre><span class="c"># 0. En début de session : récupérer les changements (les tiens d'un autre poste, ceux de Jules…)</span>
+git pull
+
+<span class="c"># 1. Voir ce qui a changé</span>
+git status
+
+<span class="c"># 2. Préparer les fichiers (un fichier, ou tout avec .)</span>
+git add script.py
+git add .
+
+<span class="c"># 3. Enregistrer avec un message clair</span>
+git commit -m "Ajoute le calcul du RPN par poste"
+
+<span class="c"># 4. Envoyer sur GitHub</span>
+git push</pre></div>
+
+  <h3>Lire l'historique</h3>
+  <div class="tbl"><table>
+    <tr><th>Commande</th><th>Ce que tu vois</th></tr>
+    <tr><td><code>git log --oneline</code></td><td>Un commit par ligne : hash + message</td></tr>
+    <tr><td><code>git log --oneline --graph --all</code></td><td>L'arbre des branches</td></tr>
+    <tr><td><code>git diff</code></td><td>Les modifications pas encore ajoutées (add)</td></tr>
+    <tr><td><code>git diff --staged</code></td><td>Ce qui partira au prochain commit</td></tr>
+    <tr><td><code>git show a3f9c21</code></td><td>Le détail d'un commit précis</td></tr>
+  </table></div>
+
+  <div class="call info"><b class="t">Écrire un bon message de commit</b>
+    <ul><li>Verbe à l'impératif, au présent : « Corrige », « Ajoute », « Supprime ».</li>
+    <li>Une seule intention par commit. Si ton message contient « et », fais deux commits.</li>
+    <li>À éviter : « modif », « update », « test ». Dans six mois tu ne sauras plus ce que c'était.</li></ul></div>
+</section>
+
+<!-- 05 -->
+<section class="mod" id="m5">
+  <div class="mod-head"><span class="mod-num">05</span><h2>Branches et pull requests</h2><button class="done-btn" data-m="m5" aria-pressed="false">Marquer comme lu</button></div>
+  <p>Une branche te permet d'essayer quelque chose sans toucher à la version qui marche. Quand c'est prêt, tu ouvres une pull request pour fusionner dans <code>main</code>.</p>
+  <figure>
+    <svg viewBox="0 0 700 150" width="100%" style="min-width:560px" role="img" aria-label="Schéma d'une branche et d'un merge">
+      <line x1="30" y1="50" x2="670" y2="50" stroke="var(--accent)" stroke-width="3"/>
+      <path d="M180 50 C 220 50, 220 110, 260 110 L 480 110 C 520 110, 520 50, 560 50" fill="none" stroke="var(--warn)" stroke-width="3"/>
+      <g fill="var(--card)" stroke-width="3">
+        <circle cx="80" cy="50" r="9" stroke="var(--accent)"/><circle cx="180" cy="50" r="9" stroke="var(--accent)"/>
+        <circle cx="330" cy="110" r="9" stroke="var(--warn)"/><circle cx="420" cy="110" r="9" stroke="var(--warn)"/>
+        <circle cx="560" cy="50" r="11" stroke="var(--accent)"/><circle cx="640" cy="50" r="9" stroke="var(--accent)"/>
+      </g>
+      <g font-size="12" fill="var(--ink)">
+        <text x="30" y="30" font-weight="700" fill="var(--accent)">main</text>
+        <text x="270" y="140" font-weight="700" fill="var(--warn)">feature/export-excel</text>
+        <text x="560" y="28" text-anchor="middle">merge (PR)</text>
+        <text x="180" y="28" text-anchor="middle">git switch -c</text>
+      </g>
+    </svg>
+    <figcaption>La branche orange vit à part ; <code>main</code> reste stable jusqu'au merge.</figcaption>
+  </figure>
+
+  <h3>Le flux complet</h3>
+  <div class="code"><div class="lbl">Terminal</div><pre><span class="c"># 1. Créer une branche et s'y placer</span>
+git switch -c feature/export-excel
+
+<span class="c"># 2. Travailler, puis commiter normalement</span>
+git add .
+git commit -m "Ajoute l'export Excel des défauts"
+
+<span class="c"># 3. Pousser la branche (-u la relie à GitHub la première fois)</span>
+git push -u origin feature/export-excel
+
+<span class="c"># 4. Ouvrir la pull request</span>
+gh pr create --fill
+
+<span class="c"># 5. Fusionner et supprimer la branche</span>
+gh pr merge --squash --delete-branch
+
+<span class="c"># 6. Revenir sur main à jour</span>
+git switch main
+git pull</pre></div>
+
+  <div class="tbl"><table>
+    <tr><th>Commande</th><th>Rôle</th></tr>
+    <tr><td><code>git branch</code></td><td>Liste les branches locales (* = branche active)</td></tr>
+    <tr><td><code>git switch main</code></td><td>Changer de branche</td></tr>
+    <tr><td><code>git branch -d nom</code></td><td>Supprimer une branche déjà fusionnée</td></tr>
+    <tr><td><code>gh pr list</code></td><td>Voir les PR ouvertes (dont celles de Jules)</td></tr>
+    <tr><td><code>gh pr checkout 12</code></td><td>Récupérer la PR n°12 en local pour la tester</td></tr>
+    <tr><td><code>gh pr view --web</code></td><td>Ouvrir la PR dans le navigateur</td></tr>
+  </table></div>
+  <div class="call info"><b class="t">Squash, merge ou rebase ?</b><p>Seul sur ton projet, prends <b>squash</b> : tous les commits de la branche deviennent un seul commit propre dans <code>main</code>.</p></div>
+</section>
+
+<!-- 06 -->
+<section class="mod" id="m6">
+  <div class="mod-head"><span class="mod-num">06</span><h2>.gitignore et secrets</h2><button class="done-btn" data-m="m6" aria-pressed="false">Marquer comme lu</button></div>
+  <p>Le fichier <code>.gitignore</code>, à la racine du repo, liste ce que Git doit ignorer. C'est la protection n°1 de tes clés API.</p>
+  <div class="code"><div class="lbl">.gitignore (Python, à copier tel quel)</div><pre><span class="c"># Secrets</span>
+.env
+*.key
+credentials.json
+
+<span class="c"># Python</span>
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+<span class="c"># macOS</span>
+.DS_Store
+
+<span class="c"># Données lourdes ou sensibles</span>
+data/
+*.xlsx
+*.csv</pre></div>
+
+  <h3>Ranger une clé API proprement</h3>
+  <div class="code"><div class="lbl">.env (jamais commité)</div><pre>GEMINI_API_KEY=ta_cle_ici</pre></div>
+  <div class="code"><div class="lbl">script.py</div><pre>import os
+from dotenv import load_dotenv   <span class="c"># pip install python-dotenv</span>
+
+load_dotenv()
+cle = os.getenv("GEMINI_API_KEY")</pre></div>
+
+  <div class="call danger"><b class="t">Clé poussée par erreur sur GitHub</b>
+    <p>Supprimer le fichier dans un nouveau commit ne suffit pas : la clé reste dans l'historique, et des robots scannent GitHub en permanence.</p>
+    <ul><li><b>Révoque la clé immédiatement</b> (AI Studio → API keys → supprimer) et crée-en une nouvelle.</li>
+    <li>Ensuite seulement, nettoie le repo.</li></ul></div>
+  <div class="call warn"><b class="t">Fichier déjà suivi</b><p>Ajouter un fichier au <code>.gitignore</code> n'a aucun effet s'il est déjà commité. Retire-le du suivi sans l'effacer du disque : <code>git rm --cached .env</code>, puis commit.</p></div>
+</section>
+
+<!-- 07 -->
+<section class="mod" id="m7">
+  <div class="mod-head"><span class="mod-num">07</span><h2>Annuler et réparer</h2><button class="done-btn" data-m="m7" aria-pressed="false">Marquer comme lu</button></div>
+  <p>Trouve ta situation dans le tableau. Les lignes rouges détruisent du travail non commité.</p>
+  <div class="tbl"><table>
+    <tr><th>Situation</th><th>Commande</th><th>Risque</th></tr>
+    <tr><td>J'ai cassé un fichier, je veux sa dernière version commitée</td><td><code>git restore fichier.py</code></td><td style="color:var(--danger)">Perd les modifs du fichier</td></tr>
+    <tr><td>J'ai fait <code>git add</code> sur un fichier par erreur</td><td><code>git restore --staged fichier.py</code></td><td style="color:var(--ok)">Aucun</td></tr>
+    <tr><td>Faute dans le message du dernier commit (pas encore poussé)</td><td><code>git commit --amend -m "Bon message"</code></td><td style="color:var(--ok)">Aucun</td></tr>
+    <tr><td>Oublié un fichier dans le dernier commit (pas poussé)</td><td><code>git add oubli.py</code> puis <code>git commit --amend --no-edit</code></td><td style="color:var(--ok)">Aucun</td></tr>
+    <tr><td>Annuler le dernier commit en gardant les fichiers (pas poussé)</td><td><code>git reset --soft HEAD~1</code></td><td style="color:var(--ok)">Aucun</td></tr>
+    <tr><td>Annuler un commit <b>déjà poussé</b></td><td><code>git revert a3f9c21</code></td><td style="color:var(--ok)">Aucun : crée un commit inverse</td></tr>
+    <tr><td>Mettre mes modifs de côté pour faire un <code>pull</code></td><td><code>git stash</code> … <code>git stash pop</code></td><td style="color:var(--ok)">Aucun</td></tr>
+    <tr><td>Tout jeter et revenir exactement à GitHub</td><td><code>git fetch</code> puis <code>git reset --hard origin/main</code></td><td style="color:var(--danger)">Perd tout le travail local</td></tr>
+  </table></div>
+  <div class="call info"><b class="t">Règle d'or</b><p>Un commit déjà poussé ne se réécrit pas (<code>amend</code>, <code>reset</code>) : on le corrige avec <code>revert</code> ou un nouveau commit.</p></div>
+  <div class="call ok"><b class="t">Filet de sécurité</b><p><code>git reflog</code> liste tout ce que tu as fait, même les commits « perdus » après un reset. Tant que c'était commité, c'est récupérable.</p></div>
+</section>
+
+<!-- 08 -->
+<section class="mod" id="m8">
+  <div class="mod-head"><span class="mod-num">08</span><h2>Les conflits</h2><button class="done-btn" data-m="m8" aria-pressed="false">Marquer comme lu</button></div>
+  <p>Un conflit arrive quand deux versions modifient les mêmes lignes (toi et Jules, ou ton Mac et le site GitHub). Git ne choisit pas à ta place et marque le fichier :</p>
+  <div class="code"><div class="lbl">fichier en conflit</div><pre>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+seuil_rpn = 100      <span class="c"># ta version</span>
+=======
+seuil_rpn = 125      <span class="c"># la version qui arrive</span>
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; origin/main</pre></div>
+  <ol class="steps">
+    <li><code>git status</code> liste les fichiers en conflit.</li>
+    <li>Ouvre-les dans VS Code : il propose « Accept Current », « Accept Incoming » ou « Accept Both ». Supprime les marqueurs <code>&lt;&lt;&lt;</code>, <code>===</code>, <code>&gt;&gt;&gt;</code>.</li>
+    <li>Termine :
+      <div class="code"><div class="lbl">Terminal</div><pre>git add fichier.py
+git commit -m "Résout le conflit sur le seuil RPN"
+git push</pre></div></li>
+  </ol>
+  <div class="call info"><b class="t">Prévenir plutôt que guérir</b><p>Fais <code>git pull</code> avant de commencer à travailler, et toujours avant de lancer une tâche Jules sur une branche que tu modifies toi-même.</p></div>
+  <p>Paniqué en plein merge ? <code>git merge --abort</code> remet tout comme avant.</p>
+</section>
+
+<!-- 09 -->
+<section class="mod" id="m9">
+  <div class="mod-head"><span class="mod-num">09</span><h2>GitHub au sens large</h2><button class="done-btn" data-m="m9" aria-pressed="false">Marquer comme lu</button></div>
+  <p>GitHub est bien plus qu'un stockage de code. Voici les fonctions utiles pour toi.</p>
+  <div class="tbl"><table>
+    <tr><th>Fonction</th><th>À quoi ça sert</th><th>Usage pour toi</th></tr>
+    <tr><td><b>Issues</b></td><td>Tickets : bugs, idées, tâches</td><td>Liste de tâches par projet. <code>gh issue create</code>. Une issue se transmet à Jules.</td></tr>
+    <tr><td><b>Pull requests</b></td><td>Relecture avant fusion</td><td>Relire ce que Jules propose avant de l'accepter.</td></tr>
+    <tr><td><b>Actions</b></td><td>Automatisations (CI/CD) déclenchées par un push ou un horaire</td><td>Lancer les tests à chaque push, exécuter un script tous les matins.</td></tr>
+    <tr><td><b>Pages</b></td><td>Héberger un site statique gratuitement</td><td>Publier tes pages HTML de révision ou un portfolio.</td></tr>
+    <tr><td><b>Releases</b></td><td>Versions numérotées (v1.0, v1.1) avec fichiers joints</td><td>Distribuer une version stable d'un outil.</td></tr>
+    <tr><td><b>Codespaces</b></td><td>VS Code dans le navigateur, sur une machine cloud</td><td>Coder depuis n'importe quel PC sans rien installer.</td></tr>
+    <tr><td><b>Settings → Collaborators</b></td><td>Inviter des personnes sur un repo privé</td><td>Projets de groupe ISTP.</td></tr>
+    <tr><td><b>README.md</b></td><td>Page d'accueil du repo, en Markdown</td><td>Expliquer le projet (ce que Jules a écrit ce soir).</td></tr>
+  </table></div>
+  <div class="call ok"><b class="t">Pack étudiant</b><p>Le <b>GitHub Student Developer Pack</b> (education.github.com) donne GitHub Pro, Copilot et des crédits chez plusieurs services. Ton attestation CVEC sert de justificatif.</p></div>
+
+  <h3>Exemple d'Action : lancer les tests à chaque push</h3>
+  <div class="code"><div class="lbl">.github/workflows/tests.yml</div><pre>name: Tests
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt pytest
+      - run: pytest</pre></div>
+</section>
+
+<!-- 10 -->
+<section class="mod" id="m10">
+  <div class="mod-head"><span class="mod-num">10</span><h2>Jules depuis le terminal</h2><button class="done-btn" data-m="m10" aria-pressed="false">Marquer comme lu</button></div>
+  <p>Jules est un agent qui clone ton repo dans une machine cloud, code, teste, puis te rend une branche ou une pull request. Le CLI <code>jules</code> le pilote sans ouvrir le site.</p>
+
+  <h3>Installation (une fois)</h3>
+  <div class="code"><div class="lbl">Terminal</div><pre>sudo npm install -g @google/jules
+jules login
+jules remote list --repo</pre></div>
+  <p>La dernière commande liste les repos autorisés. Pour en ajouter : GitHub → Settings → Applications → <b>Google Labs Jules</b> → Configure.</p>
+
+  <h3>Le cycle Jules</h3>
+  <figure>
+    <svg viewBox="0 0 760 120" width="100%" style="min-width:620px" role="img" aria-label="Cycle de travail Jules">
+      <g font-size="12">
+        <rect x="5" y="30" width="130" height="56" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="70" y="55" text-anchor="middle" fill="var(--ink)" font-weight="700">remote new</text>
+        <text x="70" y="73" text-anchor="middle" fill="var(--muted)" font-size="10">tu décris la tâche</text>
+        <rect x="160" y="30" width="130" height="56" rx="8" fill="var(--info-bg)" stroke="var(--info)"/>
+        <text x="225" y="55" text-anchor="middle" fill="var(--ink)" font-weight="700">Planning</text>
+        <text x="225" y="73" text-anchor="middle" fill="var(--muted)" font-size="10">tu approuves le plan</text>
+        <rect x="315" y="30" width="130" height="56" rx="8" fill="var(--warn-bg)" stroke="var(--warn)"/>
+        <text x="380" y="55" text-anchor="middle" fill="var(--ink)" font-weight="700">In progress</text>
+        <text x="380" y="73" text-anchor="middle" fill="var(--muted)" font-size="10">il code dans sa VM</text>
+        <rect x="470" y="30" width="130" height="56" rx="8" fill="var(--ok-bg)" stroke="var(--ok)"/>
+        <text x="535" y="55" text-anchor="middle" fill="var(--ink)" font-weight="700">Completed</text>
+        <text x="535" y="73" text-anchor="middle" fill="var(--muted)" font-size="10">tu relis le diff</text>
+        <rect x="625" y="30" width="130" height="56" rx="8" fill="var(--card)" stroke="var(--ink)"/>
+        <text x="690" y="55" text-anchor="middle" fill="var(--ink)" font-weight="700">PR → merge</text>
+        <text x="690" y="73" text-anchor="middle" fill="var(--muted)" font-size="10">git pull en local</text>
+      </g>
+      <g stroke="var(--ink)" stroke-width="1.5"><path d="M135 58H156" marker-end="url(#ar)"/><path d="M290 58H311" marker-end="url(#ar)"/><path d="M445 58H466" marker-end="url(#ar)"/><path d="M600 58H621" marker-end="url(#ar)"/></g>
+    </svg>
+  </figure>
+
+  <h3>Les commandes</h3>
+  <div class="tbl"><table>
+    <tr><th>Commande</th><th>Rôle</th></tr>
+    <tr><td><code>jules</code></td><td>Interface interactive (<code>/new</code> pour créer, <code>/remote</code> pour le tableau de bord)</td></tr>
+    <tr><td><code>jules remote list --repo</code></td><td>Repos connectés</td></tr>
+    <tr><td><code>jules remote list --session</code></td><td>Tes tâches, leur ID et leur statut</td></tr>
+    <tr><td><code>jules remote new --repo X --session "…"</code></td><td>Lancer une tâche</td></tr>
+    <tr><td><code>jules remote new --repo . --session "…"</code></td><td>Même chose, repo déduit du dossier courant</td></tr>
+    <tr><td><code>jules remote new … --parallel 2</code></td><td>Deux essais en parallèle sur la même tâche</td></tr>
+    <tr><td><code>jules remote pull --session 1485…</code></td><td>Afficher le diff produit</td></tr>
+    <tr><td><code>jules help</code></td><td>Toutes les options de ta version</td></tr>
+  </table></div>
+
+  <h3>Workflow complet sur un vrai projet</h3>
+  <div class="code"><div class="lbl">Terminal</div><pre><span class="c"># 1. Se placer dans le projet, à jour</span>
+cd ~/Documents/mon-projet
+git pull
+
+<span class="c"># 2. Confier la tâche</span>
+jules remote new --repo . --session "Ajoute des tests pytest pour toutes les fonctions de calcul.py. Ne modifie pas calcul.py."
+
+<span class="c"># 3. Suivre</span>
+jules remote list --session
+
+<span class="c"># 4. Approuver le plan sur jules.google.com, puis Publish PR</span>
+
+<span class="c"># 5. Relire et fusionner la PR depuis le terminal</span>
+gh pr list
+gh pr diff 3
+gh pr merge 3 --squash --delete-branch
+
+<span class="c"># 6. Récupérer le résultat en local</span>
+git pull</pre></div>
+
+  <h3>Écrire une bonne tâche</h3>
+  <div class="tbl"><table>
+    <tr><th>Trop vague</th><th>Exploitable</th></tr>
+    <tr><td>« Améliore le code »</td><td>« Dans <code>export.py</code>, remplace les boucles par pandas pour accélérer l'export. Garde la même signature de fonction. »</td></tr>
+    <tr><td>« Corrige les bugs »</td><td>« <code>parse_datamatrix()</code> plante si le code fait moins de 12 caractères. Renvoie <code>None</code> dans ce cas et ajoute un test. »</td></tr>
+    <tr><td>« Fais une app »</td><td>« Crée un script CLI qui lit un CSV de défauts et génère un Pareto en PNG avec matplotlib. »</td></tr>
+  </table></div>
+  <div class="call info"><b class="t">Formule</b><p><b>Fichier ciblé</b> + <b>ce qu'il faut faire</b> + <b>contrainte</b> (« ne modifie pas… ») + <b>preuve</b> (« ajoute un test »).</p></div>
+  <div class="call danger"><b class="t">Confidentialité</b><p>Le code et les conversations envoyés à Jules peuvent être examinés et utilisés pour entraîner l'IA de Google. Pas de code, de données ou de références SFCME/Schneider. Vérifie aussi ce qui est autorisé : <code>Raphgtnr/Tri-Travers-es</code> est actuellement connecté.</p></div>
+  <div class="call warn"><b class="t">Quotas</b><p>Tu es en AI Pro jusqu'au 21 octobre (100 sessions/jour). Après la bascule vers AI Plus ou la version gratuite, les limites baissent fortement.</p></div>
+</section>
+
+<!-- 11 -->
+<section class="mod" id="m11">
+  <div class="mod-head"><span class="mod-num">11</span><h2>Les erreurs de ce soir</h2><button class="done-btn" data-m="m11" aria-pressed="false">Marquer comme lu</button></div>
+  <p>Les trois blocages rencontrés pendant l'installation, et pourquoi.</p>
+  <div class="tbl"><table>
+    <tr><th>Message</th><th>Cause</th><th>Solution</th></tr>
+    <tr><td><code>zsh: unknown file attribute: i</code><br><code>Invalid tag name "#"</code></td><td>zsh ne traite pas <code>#</code> comme un commentaire en mode interactif : il l'a passé à npm comme argument.</td><td>Coller les commandes sans commentaire, ou <code>setopt interactivecomments</code>.</td></tr>
+    <tr><td><code>EACCES … mkdir /usr/local/lib/node_modules/@google</code></td><td>npm veut écrire dans un dossier système qui ne t'appartient pas.</td><td><code>sudo npm install -g @google/jules</code> (mot de passe Mac, invisible à la frappe).</td></tr>
+    <tr><td><code>zsh: parse error near `\n'</code></td><td><code>&lt;ID&gt;</code> était un modèle à remplacer ; zsh lit <code>&lt;</code> comme une redirection.</td><td>Mettre le vrai numéro : <code>--session 14852116661947841884</code>.</td></tr>
+    <tr><td><code>zsh: command not found: jules</code></td><td>L'installation avait échoué (lignes au-dessus).</td><td>Corriger l'install, puis rouvrir le Terminal si besoin.</td></tr>
+  </table></div>
+  <div class="call info"><b class="t">Réflexe</b><p>Dans un tutoriel, ce qui est entre chevrons (<code>&lt;ID&gt;</code>, <code>&lt;URL&gt;</code>, <code>&lt;nom&gt;</code>) est toujours à remplacer, chevrons compris. Et la vraie cause d'une erreur est généralement le premier message rouge, pas le dernier.</p></div>
+  <div class="call warn"><b class="t">À vérifier</b><p>Le repo <code>INJECTIONPLASTIC</code> ne contient qu'un PDF de pharmacologie. Renomme-le (GitHub → Settings → Repository name) ou range le PDF ailleurs.</p></div>
+</section>
+
+<!-- 12 -->
+<section class="mod" id="m12">
+  <div class="mod-head"><span class="mod-num">12</span><h2>Antisèche</h2><button class="done-btn" data-m="m12" aria-pressed="false">Marquer comme lu</button></div>
+  <div class="tbl"><table>
+    <tr><th>Je veux…</th><th>Commande</th></tr>
+    <tr><td>Récupérer un repo</td><td><code>gh repo clone Raphgtnr/nom</code></td></tr>
+    <tr><td>Publier un dossier local sur GitHub</td><td><code>git init</code> → <code>git add .</code> → <code>git commit -m "…"</code> → <code>gh repo create nom --private --source=. --push</code></td></tr>
+    <tr><td>Voir l'état</td><td><code>git status</code></td></tr>
+    <tr><td>Sauvegarder mon travail</td><td><code>git add .</code> → <code>git commit -m "…"</code> → <code>git push</code></td></tr>
+    <tr><td>Me mettre à jour</td><td><code>git pull</code></td></tr>
+    <tr><td>Voir l'historique</td><td><code>git log --oneline --graph</code></td></tr>
+    <tr><td>Créer une branche</td><td><code>git switch -c nom</code></td></tr>
+    <tr><td>Ouvrir une PR</td><td><code>gh pr create --fill</code></td></tr>
+    <tr><td>Fusionner une PR</td><td><code>gh pr merge N --squash --delete-branch</code></td></tr>
+    <tr><td>Annuler le dernier commit (non poussé)</td><td><code>git reset --soft HEAD~1</code></td></tr>
+    <tr><td>Annuler un commit poussé</td><td><code>git revert hash</code></td></tr>
+    <tr><td>Mettre de côté</td><td><code>git stash</code> / <code>git stash pop</code></td></tr>
+    <tr><td>Lancer Jules</td><td><code>jules remote new --repo . --session "…"</code></td></tr>
+    <tr><td>Suivre Jules</td><td><code>jules remote list --session</code></td></tr>
+    <tr><td>Voir le résultat de Jules</td><td><code>jules remote pull --session ID</code></td></tr>
+  </table></div>
+</section>
+
+<!-- 13 -->
+<section class="mod" id="m13">
+  <div class="mod-head"><span class="mod-num">13</span><h2>Quiz</h2><button class="done-btn" data-m="m13" aria-pressed="false">Marquer comme lu</button></div>
+  <p class="score" id="score">Score : 0 / 6</p>
+  <div class="quiz" id="quiz"></div>
+</section>
+</main>
+</div>
+
+<script>
+// Boutons copier
+document.querySelectorAll('.code').forEach(b=>{
+  const btn=document.createElement('button'); btn.className='copy'; btn.type='button'; btn.textContent='Copier';
+  btn.addEventListener('click',()=>{
+    const pre=b.querySelector('pre');
+    const txt=[...pre.childNodes].map(n=>n.nodeType===1&&n.classList.contains('c')?'':n.textContent).join('')
+      .split('\n').map(l=>l.replace(/\s+$/,'')).filter((l,i,a)=>!(l===''&&a[i-1]==='')).join('\n').trim();
+    const ok=()=>{btn.textContent='Copié'; setTimeout(()=>btn.textContent='Copier',1500)};
+    (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(ok).catch(()=>{
+      const r=document.createRange(); r.selectNodeContents(pre); const s=getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent='Sélectionné';
+    });
+  });
+  b.appendChild(btn);
+});
+
+// Progression
+const KEY='gitformation-done';
+let done={}; try{done=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+function render(){
+  const n=Object.values(done).filter(Boolean).length;
+  document.getElementById('pg').textContent=n+' / 13 modules';
+  document.getElementById('pgbar').style.width=(n/13*100)+'%';
+  document.querySelectorAll('.done-btn').forEach(b=>{const on=!!done[b.dataset.m]; b.setAttribute('aria-pressed',on); b.textContent=on?'Lu ✓':'Marquer comme lu'});
+  document.querySelectorAll('#toc a').forEach(a=>a.classList.toggle('done',!!done[a.getAttribute('href').slice(1)]));
+}
+document.querySelectorAll('.done-btn').forEach(b=>b.addEventListener('click',()=>{done[b.dataset.m]=!done[b.dataset.m]; try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){} render()}));
+render();
+
+// Quiz
+const Q=[
+ {q:"Tu as modifié rapport.py. Quel est l'ordre pour l'envoyer sur GitHub ?",o:["git push → git commit → git add","git add → git commit → git push","git commit → git add → git push"],a:1,e:"Working dir → staging (add) → repo local (commit) → GitHub (push)."},
+ {q:"Tu as poussé un commit avec un bug. Comment l'annuler proprement ?",o:["git reset --hard HEAD~1 puis git push","git revert <hash>","Supprimer le repo et recommencer"],a:1,e:"revert crée un commit inverse sans réécrire l'historique déjà partagé."},
+ {q:"Ta clé API Gemini est partie dans un commit public. Première action ?",o:["Supprimer le fichier et commiter","L'ajouter au .gitignore","Révoquer la clé et en créer une nouvelle"],a:2,e:"La clé reste dans l'historique : seule la révocation la neutralise."},
+ {q:"zsh répond « parse error near `\\n' » sur jules remote pull --session <ID>. Pourquoi ?",o:["Jules n'est pas installé","<ID> devait être remplacé par le vrai numéro","Il faut sudo"],a:1,e:"Les chevrons signalent une valeur à remplacer ; zsh les lit comme une redirection."},
+ {q:"Quelle tâche Jules a le plus de chances de réussir ?",o:["« Améliore mon projet »","« Corrige les bugs »","« Dans parse.py, gère les codes de moins de 12 caractères en renvoyant None, et ajoute un test »"],a:2,e:"Fichier ciblé + action + contrainte + preuve."},
+ {q:"Tu veux tester une idée sans risquer la version qui marche. Que fais-tu ?",o:["git switch -c essai","git stash","git init"],a:0,e:"Une branche isole le travail ; main reste intact jusqu'au merge."}
+];
+let score=0; const qz=document.getElementById('quiz');
+Q.forEach((it,i)=>{
+  const d=document.createElement('div'); d.className='q';
+  d.innerHTML='<p>'+(i+1)+'. '+it.q.replace(/</g,'&lt;')+'</p><div class="opts"></div><div class="expl" hidden></div>';
+  const opts=d.querySelector('.opts'), ex=d.querySelector('.expl'); let answered=false;
+  it.o.forEach((t,j)=>{const b=document.createElement('button'); b.type='button'; b.textContent=t;
+    b.addEventListener('click',()=>{ if(answered) return; answered=true;
+      opts.children[it.a].classList.add('right'); if(j!==it.a) b.classList.add('wrong'); else score++;
+      document.getElementById('score').textContent='Score : '+score+' / '+Q.length;
+      ex.textContent=it.e; ex.hidden=false;});
+    opts.appendChild(b);});
+  qz.appendChild(d);
+});
+</script>
+
+</body></html>
